@@ -1,0 +1,12 @@
+{
+    "render" : {
+        "download" : "📥",
+        "remove" : "❌",
+        "help_scenes" : "❓"
+    },
+
+    "skin_list" : {
+        "previous": "⬅️",
+        "next": "➡️"
+    }
+}

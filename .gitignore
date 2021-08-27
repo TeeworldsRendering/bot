@@ -1,0 +1,24 @@
+# Teeworlds images
+#public/database/skin/body/*.png
+#public/database/skin/eye/*.png
+#public/database/skin/feet/*.png
+#public/database/skin/full/*.png
+#public/database/skin/hand/*.png
+#public/database/scenes/*.png
+
+# SVG
+*.svg
+
+# Python cache
+__pycache__
+
+# VSCode
+.vscode
+
+# env
+json/env.json
+
+# quick todo list
+todo
+
+public/database/kits

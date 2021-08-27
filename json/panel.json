@@ -1,0 +1,11 @@
+{
+    "help": {
+        "title" : "Command help",
+        "header" : "Command prefixes : `!r `, `render `\n",
+        "fields" : {
+            "Render" : ["`skin` <skin_name>", "`list`", "`scene`"],
+            "Admin" : ["`rm` <skin_name>"]
+        },
+        "footer": ""
+    }
+}

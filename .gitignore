@@ -18,5 +18,8 @@ __pycache__
 # env
 json/env.json
 
+# tests
+tests
+
 # quick todo list
 todo

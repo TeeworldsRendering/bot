@@ -32,9 +32,7 @@ class SplitTeeworldsSkin(Path, SkinSize):
 
     def isGoodSize(self, image: object) -> bool:
         """Check for allowed proportions"""
-        return (image.size[0] % self.skin_w == 0 and \
-        image.size[1] % self.skin_h == 0 and \
-        image.size[0] == image.size[1] * 2)
+        return (image.size[0] == image.size[1] * 2)
 
     def isInDatabase(self) -> bool:
         """Check if skin exist"""

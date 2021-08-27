@@ -52,7 +52,7 @@ async def TeeMsgAttach(message: object) -> None:
     if (not attach.allowed):
         return
     visual = TeeRender(message, attach.name)
-    visual.buildSkin()
+    visual.buildSkin("no color")
     await visual.discordSend()
     renders.add(visual)
 
@@ -72,20 +72,20 @@ async def on_reaction_add(reaction: object, user: object):
     await skinsHelp.skinsListReact(reaction, str(reaction.message.id), user)
 
 @bot.command()
-async def skin(ctx: object, skinname: str = None, scene: str = None):
+async def skin(ctx: object, name: str = None, colors: str = "no color", scene: str = None):
     """Show the assembled skin with an optional scene"""
     render: TeeRender
 
-    if (not skinname or not f"{skinname}.png" in filterDir(Path.full)): return
-    if (not skinname in api.selectFilenamesByGuildId(ctx.guild.id)): return
+    if (not name or not f"{name}.png" in filterDir(Path.full)): return
+    if (not name in api.selectFilenamesByGuildId(ctx.guild.id)): return
 
-    render = TeeRender(ctx, f"{skinname}.png", scene)
+    render = TeeRender(ctx, f"{name}.png", scene)
     if (not scene):
-        render.buildSkin()
+        render.buildSkin(colors)
     elif (not f"{scene}.png" in filterDir(Path.scenes)):
         return
     else:
-        render.buildSkinOnScene()
+        render.buildSkinOnScene(colors)
     await render.discordSend()
     renders.add(render)  
 

@@ -4,6 +4,7 @@ from PIL import Image, ImageOps
 from dataclasses import dataclass
 
 from tee.path import *
+import tee.color as tint
 from utilities import *
 
 REACTIONS: json = read_json("json/reaction.json")
@@ -13,6 +14,45 @@ class RenderSize:
     skin_h: int = 100
     scene_w: int = 576
     scene_h: int = 320
+
+class ColorVerify:
+    """Verify is color is allowed"""
+    def __init__(self, args: str) -> None:
+        self.args: List[str] = args
+        self.allowed: bool = False
+    
+    def checkLen(self) -> bool:
+        """Check the len"""
+        return (len(self.args) == 6)
+
+    def checkByte(self) -> bool:
+        """Check the bytes value"""
+        f: callable = lambda x: int(x) >= 0 and int(x) <= 255
+        return (all([f(x) for x in self.args]))
+
+    def checkType(self) -> bool:
+        """Check the type"""
+        return (all([x.isdigit() for x in self.args]))
+
+    def check(self) -> None:
+        """Check everything"""
+        if (not self.checkType()):
+            self.allowed = False
+            return
+        self.allowed = self.checkLen() and self.checkByte()
+    
+class ColorParse(ColorVerify):
+    """Parse color Discord argument"""
+    def __init__(self, args: str) -> None:
+        super().__init__(args.split())
+        self.check()
+
+        if (not self.allowed):
+            return
+            
+        self.args = list(map(int, self.args))
+        self.cBody = tuple(self.args[:3] + [255])
+        self.cFeet = tuple(self.args[3:] + [255])
 
 class TeeRender(Path, RenderSize):
     """Controlling teeworlds skin rendering"""
@@ -24,14 +64,14 @@ class TeeRender(Path, RenderSize):
         self.scene: Image
         self.scenename: str = f"{scenename}.png"
         self.skin: Image
-        self.skinname = skinname
+        self.skinname: str = skinname
         self.visual: Image
 
     def setbuildname(self) -> None:
         """Change the tmp image name"""
         self.buildname: str = f"{uuid.uuid1()}.png"
 
-    def buildSkin(self) -> None:
+    def buildSkin(self, args: str) -> None:
         """Assemble a teeworlds skin"""
         self.setbuildname()
         # Init images objects
@@ -43,6 +83,12 @@ class TeeRender(Path, RenderSize):
         feet: Image = Image.open(f"{self.feet}/{self.skinname}").resize((83, 42))
         feet_s: Image = Image.open(f"{self.feet}/{self.skinname[:-4]}_shadow.png").resize((83, 42))
     
+        # Apply colors
+        color: ColorParse = ColorParse(args)
+        if (ColorParse(args).allowed):
+            body = tint.applyColor(body, color.cBody, tint._mod)
+            feet = tint.applyColor(feet, color.cFeet, tint._mod)
+
         # Create visual
         image.alpha_composite(feet_s, dest = (0, 50))
         image.alpha_composite(feet_s, dest = (18 + 4, 50))
@@ -76,12 +122,12 @@ class TeeRender(Path, RenderSize):
 
         self.scene = image
 
-    def buildSkinOnScene(self) -> None:
+    def buildSkinOnScene(self, args: str) -> None:
         """Assemble scene with the skin"""
         self.visual: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
 
         # Build visual
-        self.buildSkin()
+        self.buildSkin(args)
         self.buildScene()
         
         # Paste scene and skin on the new image

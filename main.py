@@ -30,7 +30,7 @@ api: Api = Api()
 
 @bot.event
 async def on_guild_join(guild: object):
-    for file in filterDir(Path.full):
+    for file in read_json("public/database/starter_kit/ddnet.json"):
         image: Image = Image.open(f"{Path.full}/{file}")
         api.insertSkin(
             guild_id = guild.id,

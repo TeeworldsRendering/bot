@@ -1,4 +1,4 @@
-# 🧠 Discord bot
+# ☠️ Discord bot
 
 #### How to install dependencies ?
 

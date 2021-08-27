@@ -1,10 +1,10 @@
 # Teeworlds images
-#public/database/skin/body/*.png
-#public/database/skin/eye/*.png
-#public/database/skin/feet/*.png
-#public/database/skin/full/*.png
-#public/database/skin/hand/*.png
-#public/database/scenes/*.png
+public/database/skin/body/*.png
+public/database/skin/eye/*.png
+public/database/skin/feet/*.png
+public/database/skin/full/*.png
+public/database/skin/hand/*.png
+public/database/scenes/*.png
 
 # SVG
 *.svg

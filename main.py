@@ -71,7 +71,7 @@ async def on_reaction_add(reaction: object, user: object):
     await skinsHelp.skinsListReact(reaction, str(reaction.message.id), user)
 
 @bot.command()
-async def skin(ctx: object, name: str = None, colors: str = "no color", scene: str = None):
+async def skin(ctx: object, name: str = None, colors: str = "no", scene: str = None):
     """Show the assembled skin with an optional scene"""
     render: TeeRender
 

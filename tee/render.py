@@ -9,6 +9,16 @@ from utilities import *
 
 REACTIONS: json = read_json("json/reaction.json")
 
+class Tee(Path):
+    """Tee object"""
+    def __init__(self, name: str) -> None:
+        self.Body: Image = Image.open(f"{self.body}/{name}")
+        self.Body_s: Image = Image.open(f"{self.body}/{name[:-4]}_shadow.png")
+        self.Eye_l: Image = Image.open(f"{self.eye}/{name}").resize((38, 38))
+        self.Eye_r: Image = ImageOps.mirror(self.Eye_l)
+        self.Feet: Image = Image.open(f"{self.feet}/{name}").resize((83, 42))
+        self.Feet_s: Image = Image.open(f"{self.feet}/{name[:-4]}_shadow.png").resize((83, 42))
+
 class RenderSize:
     skin_w: int = 100
     skin_h: int = 100
@@ -46,10 +56,8 @@ class ColorParse(ColorVerify):
     def __init__(self, args: str) -> None:
         super().__init__(args.split())
         self.check()
-
         if (not self.allowed):
             return
-            
         self.args = list(map(int, self.args))
         self.cBody = tuple(self.args[:3] + [255])
         self.cFeet = tuple(self.args[3:] + [255])
@@ -61,47 +69,53 @@ class TeeRender(Path, RenderSize):
         self.ctx: object = ctx
         self.sent_msg: object
         self.buildname: str
-        self.scene: Image
         self.scenename: str = f"{scenename}.png"
-        self.skin: Image
         self.skinname: str = skinname
-        self.visual: Image
 
     def setbuildname(self) -> None:
         """Change the tmp image name"""
         self.buildname: str = f"{uuid.uuid1()}.png"
 
-    def buildSkin(self, args: str) -> None:
+    def buildNormal(self, image: Image, tee: Tee) -> None:
+        """Assemble a teeworlds skin with the normal way"""
+        image.alpha_composite(tee.Feet_s, dest = (0, 50))
+        image.alpha_composite(tee.Feet_s, dest = (18 + 4, 50))
+        image.alpha_composite(tee.Body_s, dest = (0 + 4, 0))
+        image.alpha_composite(tee.Feet, dest = (0, 50))
+        image.alpha_composite(tee.Body, dest = (0 + 4, 0))
+        image.alpha_composite(tee.Feet, dest = (18 + 4, 50))
+        image.alpha_composite(tee.Eye_l, dest = (35 + 4, 25))
+        image.alpha_composite(tee.Eye_r, dest = (47 + 4, 25))
+        image.save(f"{self.buildname}", quality = 95)
+    
+    def buildNouis(self, image: Image, tee: Tee) -> None:
+        """Assemble a teeworlds skin with nouis features"""
+        return
+
+    def buildSkin(self, args: str, build: str = "default") -> Image:
         """Assemble a teeworlds skin"""
         self.setbuildname()
+        builds: Dict[str, callable] = {
+            "nouis": self.buildNouis,
+            "running": self.buildNouis
+        }
+        func: callable = builds[build] if build in builds.keys() else self.buildNormal
+
         # Init images objects
         image: Image = Image.new("RGBA", (self.skin_w, self.skin_w))
-        body: Image = Image.open(f"{self.body}/{self.skinname}")
-        body_s: Image = Image.open(f"{self.body}/{self.skinname[:-4]}_shadow.png")
-        eye_l: Image = Image.open(f"{self.eye}/{self.skinname}").resize((38, 38))
-        eye_r: Image = ImageOps.mirror(eye_l)
-        feet: Image = Image.open(f"{self.feet}/{self.skinname}").resize((83, 42))
-        feet_s: Image = Image.open(f"{self.feet}/{self.skinname[:-4]}_shadow.png").resize((83, 42))
+        tee: Tee = Tee(self.skinname)
     
         # Apply colors
         color: ColorParse = ColorParse(args)
-        if (ColorParse(args).allowed):
-            body = tint.applyColor(body, color.cBody, tint._mod)
-            feet = tint.applyColor(feet, color.cFeet, tint._mod)
+        if (color.allowed):
+            tee.Body = tint.applyColor(tee.Body, color.cBody, tint._mod)
+            tee.Feet = tint.applyColor(tee.Feet, color.cFeet, tint._mod)
 
         # Create visual
-        image.alpha_composite(feet_s, dest = (0, 50))
-        image.alpha_composite(feet_s, dest = (18 + 4, 50))
-        image.alpha_composite(body_s, dest = (0 + 4, 0))
-        image.alpha_composite(feet, dest = (0, 50))
-        image.alpha_composite(body, dest = (0 + 4, 0))
-        image.alpha_composite(feet, dest = (18 + 4, 50))
-        image.alpha_composite(eye_l, dest = (35 + 4, 25))
-        image.alpha_composite(eye_r, dest = (47 + 4, 25))
-        image.save(f"{self.buildname}", quality = 95)
-        self.skin = image
+        func(image, tee)
+        return (image)
 
-    def buildScene(self) -> None:
+    def buildScene(self) -> Image:
         """Assemble a scene"""
         image: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
         scene: Image = Image.open(f"{Path.scenes}/{self.scenename}")
@@ -119,24 +133,23 @@ class TeeRender(Path, RenderSize):
         # Out ground
         for x in range(0, self.scene_w, 64):
             image.alpha_composite(out_ground, dest = (x, self.scene_h - 64 * 2))
-
-        self.scene = image
+        return (image)
 
     def buildSkinOnScene(self, args: str) -> None:
         """Assemble scene with the skin"""
-        self.visual: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
+        visual: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
 
         # Build visual
-        self.buildSkin(args)
-        self.buildScene()
+        skin: Image = self.buildSkin(args)
+        scene: Image = self.buildScene()
         
         # Paste scene and skin on the new image
-        self.visual.alpha_composite(self.scene, dest = (0, 0))
-        self.visual.alpha_composite(self.skin, dest = ((self.scene_w - 
+        visual.alpha_composite(scene, dest = (0, 0))
+        visual.alpha_composite(skin, dest = ((self.scene_w - 
         self.skin_w) // 2, self.scene_h - 64 * 2 - self.skin_w + 18))
 
         # Overwrite self.buildname
-        self.visual.save(f"{self.buildname}", quality = 95)
+        visual.save(f"{self.buildname}", quality = 95)
 
     async def discordSend(self) -> None:
         """Send the image to discord channel"""

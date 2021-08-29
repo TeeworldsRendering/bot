@@ -3,7 +3,11 @@
         "title" : "Command help",
         "header" : "Command prefixes : `!r `, `render `\n",
         "fields" : {
-            "Render" : ["`skin` <skin_name: str>", "`list`", "`scene`"],
+            "Render" : [
+                "`skin` <skin: str> [color: str] [scene: str]",
+                "`dumb` <skin: str> [color: str] [scene: str]",
+                "`list`", "`scene`"
+            ],
             "Admin" : ["`rm` <skin_name: str>"]
         },
         "footer": ""

@@ -56,11 +56,10 @@ class ColorParse(ColorVerify):
     def __init__(self, args: str) -> None:
         super().__init__(args.split())
         self.check()
-        if (not self.allowed):
-            return
-        self.args = list(map(int, self.args))
-        self.cBody = tuple(self.args[:3] + [255])
-        self.cFeet = tuple(self.args[3:] + [255])
+        if (self.allowed):
+            args = list(map(int, self.args))
+            self.cBody = tuple(args[:3] + [255])
+            self.cFeet = tuple(args[3:] + [255])
 
 class TeeRender(Path, RenderSize):
     """Controlling teeworlds skin rendering"""
@@ -86,18 +85,24 @@ class TeeRender(Path, RenderSize):
         image.alpha_composite(tee.Feet, dest = (18 + 4, 50))
         image.alpha_composite(tee.Eye_l, dest = (35 + 4, 25))
         image.alpha_composite(tee.Eye_r, dest = (47 + 4, 25))
-        image.save(f"{self.buildname}", quality = 95)
     
-    def buildNouis(self, image: Image, tee: Tee) -> None:
-        """Assemble a teeworlds skin with nouis features"""
-        return
+    def buildDumb(self, image: Image, tee: Tee) -> None:
+        """Assemble a teeworlds skin with nouis eyes"""
+        image.alpha_composite(tee.Feet_s, dest = (0, 50))
+        image.alpha_composite(tee.Feet_s, dest = (18 + 4, 50))
+        image.alpha_composite(tee.Body_s, dest = (0 + 4, 0))
+        image.alpha_composite(tee.Feet, dest = (0, 50))
+        image.alpha_composite(tee.Body, dest = (0 + 4, 0))
+        image.alpha_composite(tee.Feet, dest = (18 + 4, 50))
+        image.alpha_composite(tee.Eye_l, dest = (10 + 4, 25))
+        image.alpha_composite(tee.Eye_r, dest = (50 + 4, 25))
 
     def buildSkin(self, args: str, build: str = "default") -> Image:
         """Assemble a teeworlds skin"""
         self.setbuildname()
         builds: Dict[str, callable] = {
-            "nouis": self.buildNouis,
-            "running": self.buildNouis
+            "dumb": self.buildDumb,
+            "later": lambda x: x
         }
         func: callable = builds[build] if build in builds.keys() else self.buildNormal
 
@@ -113,6 +118,7 @@ class TeeRender(Path, RenderSize):
 
         # Create visual
         func(image, tee)
+        image.save(f"{self.buildname}", quality = 95)
         return (image)
 
     def buildScene(self) -> Image:

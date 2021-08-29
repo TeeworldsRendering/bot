@@ -70,23 +70,28 @@ async def on_reaction_add(reaction: object, user: object):
     await renders.rendersReact(reaction, str(reaction.message.id), user)
     await skinsHelp.skinsListReact(reaction, str(reaction.message.id), user)
 
-@bot.command()
-async def skin(ctx: object, name: str = None, colors: str = "no", scene: str = None):
+async def _skin(ctx: object, name: str, colors: str, scene: str, build: str):
     """Show the assembled skin with an optional scene"""
-    render: TeeRender
-
     if (not name or not f"{name}.png" in filterDir(Path.full)): return
     if (not name in api.selectFilenamesByGuildId(ctx.guild.id)): return
 
     render = TeeRender(ctx, f"{name}.png", scene)
     if (not scene):
-        render.buildSkin(colors)
+        render.buildSkin(colors, build)
     elif (not f"{scene}.png" in filterDir(Path.scenes)):
         return
     else:
         render.buildSkinOnScene(colors)
     await render.discordSend()
-    renders.add(render)  
+    renders.add(render) 
+
+@bot.command()
+async def skin(ctx: object, name: str = None, colors: str = "no", scene: str = None):
+    await _skin(ctx, name, colors, scene, "default")
+
+@bot.command()
+async def dumb(ctx: object, name: str = None, colors: str = "no", scene: str = None):
+    await _skin(ctx, name, colors, scene, "dumb")
 
 @bot.command(pass_context = True)
 async def help(ctx: object):

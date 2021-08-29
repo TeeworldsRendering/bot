@@ -1,5 +1,8 @@
 {
     "token": "token",
     "host": "localhost",
-    "port": 1234
+    "port": 1234,
+    "whitelist": [
+        "bot id that can upload skins, can be empty"
+    ]
 }

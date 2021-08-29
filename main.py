@@ -42,16 +42,15 @@ async def on_guild_join(guild: object):
 async def TeeMsgAttach(message: object) -> None:
     """Controlling Discord attachments for teeworlds"""
     attachs: object = message.attachments
-    attach: TeeAttach
-    visual: TeeRender
 
-    if (len(attachs) != 1 or message.author.bot):
-        return
-    attach = TeeAttach(attachs[0], message)
+    if (len(attachs) != 1): return
+    if (message.author.bot and not message.author.id in ENV["whitelist"]): return
+
+    attach: TeeAttach = TeeAttach(attachs[0], message)
     attach.downloadAttach()
     if (not attach.allowed):
         return
-    visual = TeeRender(message, attach.name)
+    visual: TeeRender = TeeRender(message, attach.name)
     visual.buildSkin("no color")
     await visual.discordSend()
     renders.add(visual)
@@ -59,7 +58,7 @@ async def TeeMsgAttach(message: object) -> None:
 @bot.event
 async def on_message(message: object):
     if (not isinstance(message.channel, discord.DMChannel)): 
-        if (message.channel.name == "tee"):
+        if (message.channel.name == "skin-rendering"):
             await TeeMsgAttach(message)
     await bot.process_commands(message)
 

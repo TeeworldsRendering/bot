@@ -113,8 +113,9 @@ class TeeRender(Path, RenderSize):
         # Apply colors
         color: ColorParse = ColorParse(args)
         if (color.allowed):
-            tee.Body = tint.applyColor(tee.Body, color.cBody, tint._mod)
-            tee.Feet = tint.applyColor(tee.Feet, color.cFeet, tint._mod)
+            # .convert('LA') for grayscale before coloring skin
+            tee.Body = tint.applyColor(tee.Body.convert('LA').convert('RGBA'), color.cBody, tint._mod)
+            tee.Feet = tint.applyColor(tee.Feet.convert('LA').convert('RGBA'), color.cFeet, tint._mod)
 
         # Create visual
         func(image, tee)

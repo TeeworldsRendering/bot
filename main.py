@@ -81,7 +81,7 @@ async def _skin(ctx: object, name: str, colors: str, scene: str, build: str):
     elif (not f"{scene}.png" in filterDir(Path.scenes)):
         return
     else:
-        render.buildSkinOnScene(colors)
+        render.buildSkinOnScene(colors, build)
     await render.discordSend()
     renders.add(render) 
 

@@ -141,12 +141,12 @@ class TeeRender(Path, RenderSize):
             image.alpha_composite(out_ground, dest = (x, self.scene_h - 64 * 2))
         return (image)
 
-    def buildSkinOnScene(self, args: str) -> None:
+    def buildSkinOnScene(self, args: str, build: str = "default") -> None:
         """Assemble scene with the skin"""
         visual: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
 
         # Build visual
-        skin: Image = self.buildSkin(args)
+        skin: Image = self.buildSkin(args, build)
         scene: Image = self.buildScene()
         
         # Paste scene and skin on the new image

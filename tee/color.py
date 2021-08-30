@@ -9,12 +9,10 @@ def op_tuple(func: callable, t1: tuple, t2: tuple) -> tuple:
 
 # The result is a weighted average of the bottom pixel and the top pixel.
 # The weight of the pixels is determined by a.
-
 def _blend(src: Color, dest: Color, a: int = 255) -> Color:
     return ((a * src) // 255 + ((1 - a) * dest) // 255)
 
 # It makes the colors more vivid by adding the color of the source to that of the destination.
-
 def _add(src: Color, dest: Color, a: int = 255) -> Color:
     return ((a * src) // 255 + dest)
 

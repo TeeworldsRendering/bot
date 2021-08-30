@@ -23,7 +23,7 @@ def _add(src: Color, dest: Color, a: int = 255) -> Color:
 def _mod(src: Color, dest: Color) -> Color:
     return ((src * dest) // 255)
 
-# Change each pixel of the src image depending of
+# Change each pixel of the src image depending of the mod
 def applyColor(image: Image, color: Color, func: callable) -> Image:
     arr: List[Color] = []
     ret: Image = Image.new(image.mode, image.size)

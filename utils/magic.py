@@ -1,4 +1,4 @@
-from tee.skin import *
+from cogs.split import *
 
 def main() -> None:
     # Split every skins

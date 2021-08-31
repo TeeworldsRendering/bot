@@ -56,6 +56,7 @@ class PageEngine(commands.Cog, Pages):
     async def on_reaction_add(self, reaction: object, user: object):
         if (not reaction.message.author.bot or user.bot):
             return
+        await reaction.remove(user)
         await self.check_for_pages(reaction, user)
     
     @commands.command(aliases=["list"])

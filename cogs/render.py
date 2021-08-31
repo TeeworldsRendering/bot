@@ -9,7 +9,7 @@ from utils.utilities import *
 from cogs.attach import *
 
 ENV: json = read_json("json/env.json")
-REACTIONS: json = read_json("json/reaction.json")
+REACTION: json = read_json("json/reaction.json")
 
 class Tee(Path):
     """Tee object"""
@@ -167,7 +167,7 @@ class TeeRender(Path, RenderSize):
         embed.set_image(url=f"attachment://{self.buildname}")
         embed.set_footer(text=self.skinname[:-4])
         msg: object = await self.ctx.channel.send(file=discord.File(self.buildname), embed=embed)
-        for _, v in REACTIONS["render"].items():
+        for _, v in REACTION["render"].items():
             await msg.add_reaction(v)
         self.sent_msg = msg
         os.remove(self.buildname)
@@ -183,7 +183,7 @@ class TeeRenders(Path):
     
     async def download(self, reaction: object, msg_id: str, user: object) -> None:
         """"Send original teeworlds skin to discord channel"""
-        if (str(reaction) != REACTIONS["render"]["download"]): return
+        if (str(reaction) != REACTION["render"]["download"]): return
         if (not msg_id in list(self.renders.keys())): return
 
         skinname: str = f"{self.full}/{self.renders[msg_id].skinname}"
@@ -191,7 +191,7 @@ class TeeRenders(Path):
 
     async def _rm(self, reaction: object, msg_id: str, user: object) -> None:
         """Remove skin files and associated Discord messages"""
-        if (str(reaction) != REACTIONS["render"]["remove"]): return
+        if (str(reaction) != REACTION["render"]["remove"]): return
         if (not msg_id in list(self.renders.keys())): return
         if (not user.guild_permissions.administrator): return
     
@@ -211,7 +211,7 @@ class TeeRenders(Path):
     
     async def discordSendScenesList(self, reaction: object, user: object) -> None:
         """Send a list with every scenes"""
-        if (str(reaction) != REACTIONS["render"]["help_scenes"]): return
+        if (str(reaction) != REACTION["render"]["help_scenes"]): return
 
         # add _.png because Discord markdown in embed seems to be bugged
         full_list: str = ["_.png"] + list(map(lambda x: x[:-4], filterDir(self.scenes)))
@@ -254,6 +254,7 @@ class Render(commands.Cog, TeeRenders):
     async def on_reaction_add(self, reaction: object, user: object):
         if (not reaction.message.author.bot or user.bot):
             return
+        await reaction.remove(user)
         await self.rendersReact(reaction, user)
 
     @commands.command()

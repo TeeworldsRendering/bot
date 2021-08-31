@@ -6,11 +6,11 @@ from cogs.split import *
 
 import cogs.api as API
 
-class TeeAttach(Path):
+class TeeAttach(SplitTeeworldsSkin):
     """Controlling attachments for teeworlds skin"""
     def __init__(self, attach: object, msg: object):
+        SplitTeeworldsSkin.__init__(self, attach.filename)
         self.attach: object = attach
-        self.name: str = self.attach.filename
         self.allowed: bool = True
         self.msg: object = msg
 
@@ -26,8 +26,7 @@ class TeeAttach(Path):
             self.allowed = False
             return
         image: object = Image.open(requests.get(self.attach.url, stream = True).raw)
-        twskin = SplitTeeworldsSkin(self.name)
-        if (not twskin.isGoodSize(image)):
+        if (not self.isGoodSize(image)):
             self.allowed = False
             return
 
@@ -38,12 +37,12 @@ class TeeAttach(Path):
             md5_checksum = hashlib.md5(image.tobytes()).hexdigest()
         )
 
-        if (twskin.isInDatabase()): return
+        if (self.isInDatabase()): return
 
         # Save
         image.save(f"{self.full}/{self.name}")
         print(f"{self.name} saved in {self.full}")
 
         # Split
-        twskin.splitTee()
+        self.splitTee()
         print(f"{self.name} has been splitted")

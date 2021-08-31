@@ -3,7 +3,7 @@ from PIL import Image, ImageOps
 from math import *
 import os, glob
 
-from tee.path import *
+from cogs.path import *
 
 class SplitTeeworldsSkins(Path):
     def __init__(self) -> None:

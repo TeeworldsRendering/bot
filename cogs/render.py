@@ -1,12 +1,14 @@
 import discord, os, uuid
+from discord.ext import commands
 from typing import *
 from PIL import Image, ImageOps
-from dataclasses import dataclass
 
-from tee.path import *
-import tee.color as tint
-from utilities import *
+from cogs.path import *
+import cogs.color as tint
+from utils.utilities import *
+from cogs.attach import *
 
+ENV: json = read_json("json/env.json")
 REACTIONS: json = read_json("json/reaction.json")
 
 class Tee(Path):
@@ -20,6 +22,7 @@ class Tee(Path):
         self.Feet_s: Image = Image.open(f"{self.feet}/{name[:-4]}_shadow.png").resize((83, 42))
 
 class RenderSize:
+    """Some images size"""
     skin_w: int = 100
     skin_h: int = 100
     scene_w: int = 576
@@ -178,7 +181,7 @@ class TeeRenders(Path):
         """Append a render of one client"""
         self.renders[str(render.sent_msg.id)] = render
     
-    async def discordSendOriginalSkin(self, reaction: object, msg_id: str, user: object) -> None:
+    async def download(self, reaction: object, msg_id: str, user: object) -> None:
         """"Send original teeworlds skin to discord channel"""
         if (str(reaction) != REACTIONS["render"]["download"]): return
         if (not msg_id in list(self.renders.keys())): return
@@ -186,7 +189,7 @@ class TeeRenders(Path):
         skinname: str = f"{self.full}/{self.renders[msg_id].skinname}"
         await user.send(file=discord.File(skinname))
 
-    async def discordRmRender(self, reaction: object, msg_id: str, user: object) -> None:
+    async def _rm(self, reaction: object, msg_id: str, user: object) -> None:
         """Remove skin files and associated Discord messages"""
         if (str(reaction) != REACTIONS["render"]["remove"]): return
         if (not msg_id in list(self.renders.keys())): return
@@ -199,7 +202,7 @@ class TeeRenders(Path):
 
         await obj.ctx.delete()
         await obj.sent_msg.delete()
-        Api().deleteSkin(
+        API.deleteSkin(
             guild_id = obj.ctx.guild.id, 
             filename = obj.skinname[:-4]
         )
@@ -218,8 +221,90 @@ class TeeRenders(Path):
 
         await user.send(embed=embed)
     
-    async def rendersReact(self, reaction: object, msg_id: str, user: object) -> None:
+    async def rendersReact(self, reaction: object, user: object) -> None:
         """Check reactions"""
-        await self.discordSendOriginalSkin(reaction, msg_id, user)
+        _id :str = str(reaction.message.id)
+    
+        await self.download(reaction, _id, user)
         await self.discordSendScenesList(reaction, user)
-        await self.discordRmRender(reaction, msg_id, user)
+        await self._rm(reaction, _id, user)
+    
+class Render(commands.Cog, TeeRenders):
+    """Manage role add and update"""
+    def __init__(self, bot: commands.Bot) -> None:
+        TeeRenders.__init__(self)
+        self.bot: commands.Bot = bot
+
+    async def _skin(self, ctx: object, name: str, colors: str, scene: str, build: str):
+        """Show the assembled skin with an optional scene"""
+        if (not name or not f"{name}.png" in filterDir(Path.full)): return
+        if (not name in API.selectFilenamesByGuildId(ctx.guild.id)): return
+
+        render = TeeRender(ctx, f"{name}.png", scene)
+        if (not scene):
+            render.buildSkin(colors, build)
+        elif (not f"{scene}.png" in filterDir(Path.scenes)):
+            return
+        else:
+            render.buildSkinOnScene(colors, build)
+        await render.discordSend()
+        self.add(render) 
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction: object, user: object):
+        if (not reaction.message.author.bot or user.bot):
+            return
+        await self.rendersReact(reaction, user)
+
+    @commands.command()
+    async def skin(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
+        await self._skin(ctx, name, colors, scene, "default")
+    
+    @commands.command()
+    async def dumb(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
+        await self._skin(ctx, name, colors, scene, "dumb")
+    
+    async def TeeMsgAttach(self, message: object) -> None:
+        """Controlling Discord attachments for teeworlds"""
+        attachs: object = message.attachments
+
+        if (len(attachs) != 1): return
+        if (message.author.bot and not message.author.id in ENV["whitelist"]): return
+
+        attach: TeeAttach = TeeAttach(attachs[0], message)
+        attach.downloadAttach()
+        if (not attach.allowed):
+            return
+        visual: TeeRender = TeeRender(message, attach.name)
+        visual.buildSkin("no color")
+        await visual.discordSend()
+        self.add(visual)
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: object):
+        if (not isinstance(message.channel, discord.DMChannel)): 
+            if (message.channel.name == "skin-rendering"):
+                await self.TeeMsgAttach(message)
+        #await bot.process_commands(message)
+    
+    @commands.has_permissions(administrator=True)
+    @commands.command()
+    async def rm(self, ctx: object, skinname: str = None):
+        """Remove skin from guild"""
+        if (not skinname or not f"{skinname}.png" in filterDir(Path.full)): return
+        if (not skinname in API.selectFilenamesByGuildId(ctx.guild.id)): return
+
+        API.deleteSkin(guild_id=ctx.guild.id, filename=skinname)
+        await bmessage(ctx, f"❌ `{skinname}` has been removed")
+
+    @commands.command()
+    async def scene(self, ctx: object):
+        """Send a message that explain how to create a scene"""
+        embed = discord.Embed(color=0x000000, title="How to build your own scene ?")
+        embed.set_image(url="attachment://help.png")
+        embed.set_footer(text="to add your scene to the list, send it to an admin")
+
+        await ctx.send(file=discord.File("public/database/help.png"), embed=embed)
+
+def setup(bot: commands.Bot):
+    bot.add_cog(Render(bot))

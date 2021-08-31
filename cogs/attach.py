@@ -2,12 +2,9 @@ import requests, hashlib
 from typing import *
 from PIL import Image
 
-from tee.render import *
-from tee.path import *
-from tee.skin import *
-from tee.api import *
+from cogs.split import *
 
-from utilities import *
+import cogs.api as API
 
 class TeeAttach(Path):
     """Controlling attachments for teeworlds skin"""
@@ -34,7 +31,7 @@ class TeeAttach(Path):
             self.allowed = False
             return
 
-        Api().insertSkin(
+        API.insertSkin(
             guild_id = self.msg.guild.id,
             user_id = self.msg.author.id,
             filename = self.name[:-4],

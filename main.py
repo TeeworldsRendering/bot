@@ -9,13 +9,11 @@ import cogs.api as API
 
 extensions: Tuple[str] = (
     "cogs.page",
-    "cogs.render",
-    "cogs.help"
+    "cogs.render"
 )
 
 ENV: json = read_json("json/env.json")
-bot: object = commands.Bot(command_prefix = ['!r ', 'render '])
-bot.remove_command("help")
+bot: object = commands.Bot(command_prefix = ['!r ', 'render '], help_command=commands.MinimalHelpCommand())
 
 @bot.event
 async def on_ready() -> None:

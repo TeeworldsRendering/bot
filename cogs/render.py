@@ -259,10 +259,12 @@ class Render(commands.Cog, TeeRenders):
 
     @commands.command()
     async def skin(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
+        """Displays an assembled teeworlds skin"""
         await self._skin(ctx, name, colors, scene, "default")
     
     @commands.command()
     async def dumb(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
+        """Displays an assembled teeworlds skin with a dumb expression"""
         await self._skin(ctx, name, colors, scene, "dumb")
     
     async def TeeMsgAttach(self, message: object) -> None:

@@ -47,7 +47,7 @@ class Pages:
         await self.change_page(reaction, _id, REACTION["pages"]["previous"], -1, user)
         await self.change_page(reaction, _id, REACTION["pages"]["next"], 1, user)
 
-class PageEngine(commands.Cog, Pages):
+class Skins(commands.Cog, Pages):
     """Page commands"""
     def __init__(self) -> None:
         Pages.__init__(self)
@@ -60,18 +60,18 @@ class PageEngine(commands.Cog, Pages):
         await self.check_for_pages(reaction, user)
     
     @commands.command(aliases=["list"])
-    async def List(self, ctx: object, page: int = 0):
+    async def List(self, ctx: object):
         """Show every skin"""
         # add '_' because Discord markdown in embed seems to be bugged
         pages: List[List[str]] = groupList(API.selectFilenamesByGuildId(ctx.guild.id), 10) \
             or [["Empty"]]
         embed = discord.Embed(color=0x000000, description="```" + "\n".join(pages[0]) + "```")
-        embed.set_footer(text=f"page {page + 1} / {len(pages)}")
+        embed.set_footer(text=f"page {0 + 1} / {len(pages)}")
         msg: object = await ctx.send(embed = embed)
 
         for _, v in REACTION["pages"].items():
             await msg.add_reaction(v)
-        self.pages[msg.id] = Page(msg, page, pages, ctx.author.id, "skinlist")
+        self.pages[msg.id] = Page(msg, 0, pages, ctx.author.id, "skinlist")
     
 def setup(bot: commands.Bot):
-    bot.add_cog(PageEngine())
+    bot.add_cog(Skins())

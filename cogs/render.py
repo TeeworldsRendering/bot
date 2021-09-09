@@ -25,7 +25,7 @@ class RenderSize:
     """Some images size"""
     skin_w: int = 100
     skin_h: int = 100
-    scene_w: int = 576
+    scene_w: int = 546
     scene_h: int = 320
 
 class ColorVerify:
@@ -129,20 +129,20 @@ class TeeRender(Path, RenderSize):
         """Assemble a scene"""
         image: Image = Image.new("RGBA", (self.scene_w, self.scene_h))
         scene: Image = Image.open(f"{Path.scenes}/{self.scenename}")
-        out_ground: Image = scene.crop((0, 0, 64, 64))
-        in_ground: Image = scene.crop((64, 0, 64 + 64, 64 + 64))
+        out_ground: Image = scene.crop((0, 0, 42, 42))
+        in_ground: Image = scene.crop((42, 0, 42 + 42, 42 + 42))
 
         # Background
-        bg: Image = scene.crop((0, 64, self.scene_w, 64 + self.scene_h))
+        bg: Image = scene.crop((0, 42, self.scene_w, 42 + self.scene_h))
         image.alpha_composite(bg, dest = (0, 0))
 
         # In ground
-        for x in range(0, self.scene_w, 64):
-            image.alpha_composite(in_ground, dest = (x, self.scene_h - 64 * 1))
+        for x in range(0, self.scene_w, 42):
+            image.alpha_composite(in_ground, dest = (x, self.scene_h - 42 * 1))
 
         # Out ground
-        for x in range(0, self.scene_w, 64):
-            image.alpha_composite(out_ground, dest = (x, self.scene_h - 64 * 2))
+        for x in range(0, self.scene_w, 42):
+            image.alpha_composite(out_ground, dest = (x, self.scene_h - 42 * 2))
         return (image)
 
     def buildSkinOnScene(self, args: str, build: str = "default") -> None:
@@ -156,7 +156,7 @@ class TeeRender(Path, RenderSize):
         # Paste scene and skin on the new image
         visual.alpha_composite(scene, dest = (0, 0))
         visual.alpha_composite(skin, dest = ((self.scene_w - 
-        self.skin_w) // 2, self.scene_h - 64 * 2 - self.skin_w + 18))
+        self.skin_w) // 2, self.scene_h - 42 * 2 - self.skin_w + 18))
 
         # Overwrite self.buildname
         visual.save(f"{self.buildname}", quality = 95)
@@ -217,7 +217,7 @@ class TeeRenders(Path):
         full_list: str = ["_.png"] + list(map(lambda x: x[:-4], filterDir(self.scenes)))
         embed = discord.Embed(color=0x000000, title="Scenes", 
         description='```'+'\n'.join(full_list)+'```')
-        embed.set_footer(text="Usage: t skin <skin_name> <scene_name>")
+        embed.set_footer(text="Usage: !r skin <skin_name> <scene_name>")
 
         await user.send(embed=embed)
     

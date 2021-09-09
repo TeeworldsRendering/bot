@@ -4,7 +4,6 @@ public/database/skin/eye/*.png
 public/database/skin/feet/*.png
 public/database/skin/full/*.png
 public/database/skin/hand/*.png
-public/database/scenes/*.png
 
 # SVG
 *.svg

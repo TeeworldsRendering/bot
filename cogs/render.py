@@ -259,12 +259,24 @@ class Render(commands.Cog, TeeRenders):
 
     @commands.command()
     async def skin(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
-        """Displays an assembled teeworlds skin"""
+        """Displays an assembled teeworlds skin
+        
+        examples:
+                    `!r skin twinbop`
+                    `!r skin twinbop "0 255 0 255 255 255"`
+                    `!r skin twinbop "0 255 0 255 255 255" grass`
+                    `!r skin twinbop "no" grass`"""
         await self._skin(ctx, name, colors, scene, "default")
     
     @commands.command()
     async def dumb(self, ctx: object, name: str = None, colors: str = "no", scene: str = None):
-        """Displays an assembled teeworlds skin with a dumb expression"""
+        """Displays an assembled teeworlds skin with a dumb expression
+        
+        examples: 
+                    `!r dumb twinbop`
+                    `!r dumb twinbop "0 255 0 255 255 255"`
+                    `!r dumb twinbop "0 255 0 255 255 255" grass`
+                    `!r dumb twinbop "no" grass`"""
         await self._skin(ctx, name, colors, scene, "dumb")
     
     async def TeeMsgAttach(self, message: object) -> None:

@@ -61,8 +61,7 @@ class Skins(commands.Cog, Pages):
     
     @commands.command(aliases=["list"])
     async def List(self, ctx: object):
-        """Show every skin"""
-        # add '_' because Discord markdown in embed seems to be bugged
+        """Show every skin name"""
         pages: List[List[str]] = groupList(API.selectFilenamesByGuildId(ctx.guild.id), 10) \
             or [["Empty"]]
         embed = discord.Embed(color=0x000000, description="```" + "\n".join(pages[0]) + "```")
